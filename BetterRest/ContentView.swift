@@ -10,6 +10,11 @@ import SwiftUI
 
 struct ContentView: View {
     
+
+    @State var animateCoin = false
+    @Environment(\.colorScheme) var colorScheme
+
+    
     @State private var wakeUp = defaultWakeTime
     @State private var sleepAmount = 8.0
     @State private var coffeeAmount = 1
@@ -27,57 +32,93 @@ struct ContentView: View {
     }
     
     var body: some View {
-        
         NavigationView {
             ZStack {
-               
-            Form {
-                
-                Text("Qual horário você quer acordar?")
-                    .font(.headline)
-                
-                DatePicker("Por favor, escolha a hora", selection: $wakeUp, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                
-                VStack(alignment: .leading, spacing: 0) {
+                RadialGradient(gradient: Gradient(colors: [.green, .white]), center: .center, startRadius: 20, endRadius: 200)
+                Form {
                     
-                    Text("Quantidade de sono desejável")
+                    Text("Qual horário você quer acordar?")
                         .font(.headline)
                     
-                    Stepper("  \(sleepAmount.formatted()) horas", value: $sleepAmount, in: 4...12, step: 0.25)
-                }
-                
-                
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Ingestão diária de café")
-                        .font(.headline)
+                    DatePicker("Por favor, escolha a hora", selection: $wakeUp, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
                     
-                    Stepper(coffeeAmount == 1 ? "  1 xícara" : "  \(coffeeAmount) xícaras", value: $coffeeAmount, in: 1...20)
-                }
-                
-               
-                
-                
+                    VStack(alignment: .leading, spacing: 0) {
+                        
+                        Text("Quantidade de sono desejável")
+                            .font(.headline)
+                        
+                        Stepper("  \(sleepAmount.formatted()) horas", value: $sleepAmount, in: 4...12, step: 0.25)
+                    }
+                    
+                    
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Ingestão diária de café")
+                            .font(.headline)
+                        
+                        Stepper(coffeeAmount == 1 ? "  1 xícara" : "  \(coffeeAmount) xícaras", value: $coffeeAmount, in: 1...20)
+                    }
+              
             }
+                
+                // .background(Color(.systemGroupedBackground)).opacity(0.4)
+                .background(Color.green).opacity(0.5)
+                .scrollContentBackground(.hidden)
             
+           
             .navigationTitle("MelhorDescanso")
             .toolbar {
                 Button("Calcular", action: calculateBedtime)
                 
                     .alert(alertTitle, isPresented: $showingAlert) {
-                        Button("OK") {}
+                        Button("OK") { self.animateCoin.toggle()}
                     } message: {
                         Text(alertMessage)
                     }
-                
             }
-          
+                
                 VStack {
-                    Image(image).resizable().scaledToFit().frame(width: 200.0, height: 100.0).clipShape(Circle())
+                   
+                    Rectangle()
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .frame(width: 150, height: 150, alignment: .center)
+                        .offset(y: 0)
+                        .mask(Image(systemName: "deskclock")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .rotation3DEffect(
+                                Angle(degrees: self.animateCoin ? 360 : 0),
+                                axis: (x: 0, y: self.animateCoin ? 360 : 0, z: 0)
+                                
+                            )
+                        )
+                        .offset(y: self.animateCoin ? 600 : 0)
+                        .animation(.linear(duration: 1))
+                   
                 }
+                
+                
+                VStack {
+                    (Image(image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 210.0, height: 110.0)
+                        .clipShape(Circle())
+                        .rotation3DEffect(
+                            Angle(degrees: self.animateCoin ? 360 : 0),
+                            axis: (x: 0, y: self.animateCoin ? 360 : 0, z: 0)
+                            
+                        )
+                    )
+                    .offset(y: self.animateCoin ? 600 : 0)
+                    .animation(.linear(duration: 1))
+                }
+                
         }
+           
+          
     }
-    
+       
     }
     
     func calculateBedtime() {
@@ -99,6 +140,8 @@ struct ContentView: View {
             alertMessage = "Desculpe, houve um problema ao calcular sua hora de dormir"
         }
         showingAlert = true
+        self.animateCoin.toggle()
+       
     }
 }
 
